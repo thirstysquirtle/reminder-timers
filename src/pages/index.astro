@@ -1,0 +1,29 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Timers from "../components/Timers.svelte"
+---
+
+<Layout title="Welcome to Astro.">
+	<main>
+		<Timers client:load />
+	</main>
+</Layout>
+
+<style>
+	main {
+		/* width: 800px; */
+		width: 100%;
+		color: white;
+		font-size: 20px;
+		line-height: 1.6;
+	}
+	
+	h1 {
+		font-size: 4rem;
+		font-weight: 700;
+		line-height: 1;
+		text-align: center;
+		margin-bottom: 1em;
+	}
+	
+</style>

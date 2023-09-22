@@ -1,0 +1,8 @@
+*
+!package*.json
+!*config*.*js
+!.gitignore
+!*/
+!src/**
+
+node_modules/**
