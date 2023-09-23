@@ -14,25 +14,36 @@
 
     let currentTime: Date | number;
 
-    let notifSound
-    const notificationOptions:NotificationOptions = {
-        icon: "./catCri2.jpg",
-        vibrate: [100,100],
-        image:"./catCri2.jpg",
-        badge: "./catCri2.jpg",
-    }
+    let notifSound;
+    const notificationOptions: NotificationOptions = {
+        icon: "./repeating-timers/catCri2.jpg",
+        vibrate: [100, 100],
+        image: "./repeating-timers/catCri2.jpg",
+        badge: "./repeating-timers/catCri2.jpg",
+    };
 
     function setupNotifications() {
         if (!("Notification" in window)) {
             alert("This browser does not support desktop notification");
-        } else if (
-            Notification.permission !== "denied" &&
-            Notification.permission !== "granted"
-        ) {
-            Notification.requestPermission().then((permission) => {if (permission =="granted") notifSound = new Audio("./short-success-sound-glockenspiel-treasure-video-game-6346.mp3");});
+        } else if (Notification.permission == "granted") {
+            notifSound = new Audio(
+                "./repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3"
+            );
+            notifPermission = true;
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then((permission) => {
+                if (permission == "granted") {
+                    notifSound = new Audio(
+                        "./repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3"
+                    );
+                    notifPermission = true;
+                } else {
+                    notifPermission = false;
+                }
+            });
         }
     }
-
+    let notifPermission = false;
     onMount(() => {
         setupNotifications();
         currentTime = Date.now();
@@ -43,11 +54,14 @@
                     if (timer.timeLeftSeconds < 0) {
                         timer.timeLeftSeconds = timer.intervalInSeconds;
                         timer.count += 1;
-                        if(Notification.permission == "granted") {
-                            new Notification(timer.reminder, notificationOptions)
+                        if (Notification.permission == "granted") {
+                            new Notification(
+                                timer.reminder,
+                                notificationOptions
+                            );
                             // notifSound.pause()
-                            notifSound.currentTime =0
-                            notifSound.play()
+                            notifSound.currentTime = 0;
+                            notifSound.play();
                         }
                     }
                 }
@@ -186,11 +200,11 @@
 
     <form
         id="add-reminder-form"
-        class="gap-2"
+        class="gap-2 justify-center m-2"
         on:submit|preventDefault={addTimer}
     >
         <label for="reminder">Name:</label>
-        <input type="text" name="reminder" id="reminder" maxlength="20" />
+        <input type="text" name="reminder" id="reminder" />
 
         <label for="time">Timer Interval: </label>
         <TimeInput id={"time"} />
@@ -202,6 +216,12 @@
         </button>
     </form>
 </div>
+
+{#if !notifPermission}
+    <p class="w-full flex justify-center text-2xl">
+        You might want to allow notifications
+    </p>
+{/if}
 
 <style>
     input[type="text"]:focus {
@@ -253,11 +273,11 @@
         align-self: stretch;
         display: flex;
         align-items: center;
-        padding: 0.25rem;
+        padding: 0.35rem;
     }
     .row {
         width: 100%;
-        grid-template-columns: 14em 1fr 1fr 3em 5em 3em;
+        grid-template-columns: minmax(14em, 1.25fr) 1fr 1fr 3em 5em 3em;
         word-break: break-all;
     }
 
