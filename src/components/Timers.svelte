@@ -14,7 +14,7 @@
 
     let currentTime: Date | number;
 
-    const notifSound = new Audio("./short-success-sound-glockenspiel-treasure-video-game-6346.mp3");
+    let notifSound
     const notificationOptions:NotificationOptions = {
         icon: "./catCri2.jpg",
         vibrate: [100,100],
@@ -29,7 +29,7 @@
             Notification.permission !== "denied" &&
             Notification.permission !== "granted"
         ) {
-            Notification.requestPermission();
+            Notification.requestPermission().then((permission) => {if (permission =="granted") notifSound = new Audio("./short-success-sound-glockenspiel-treasure-video-game-6346.mp3");});
         }
     }
 
@@ -204,10 +204,6 @@
 </div>
 
 <style>
-    img {
-        height: 2rem;
-    }
-
     input[type="text"]:focus {
         outline-offset: 1.5px;
         outline: 2px solid hsla(219, 13%, 69%, 0.301);
