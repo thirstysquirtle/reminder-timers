@@ -16,10 +16,10 @@
 
     let notifSound;
     const notificationOptions: NotificationOptions = {
-        icon: "./repeating-timers/catCri2.jpg",
+        icon: "/repeating-timers/catCri2.jpg",
         vibrate: [100, 100],
-        image: "./repeating-timers/catCri2.jpg",
-        badge: "./repeating-timers/catCri2.jpg",
+        image: "/repeating-timers/catCri2.jpg",
+        badge: "/repeating-timers/catCri2.jpg",
     };
 
     function setupNotifications() {
@@ -27,14 +27,14 @@
             alert("This browser does not support desktop notification");
         } else if (Notification.permission == "granted") {
             notifSound = new Audio(
-                "./repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3"
+                "/repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3"
             );
             notifPermission = true;
         } else if (Notification.permission !== "denied") {
             Notification.requestPermission().then((permission) => {
                 if (permission == "granted") {
                     notifSound = new Audio(
-                        "./repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3"
+                        "/repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3"
                     );
                     notifPermission = true;
                 } else {
