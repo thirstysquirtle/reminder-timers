@@ -7,7 +7,9 @@
         }
        
         e.target.value = "000000".slice(0, 6 - e.target.value.length) + e.target.value;
-     
+        realInput.selectionEnd = e.target.value.length - selectPosition
+
+        
         hours = e.target.value.slice(0, 2);
         minutes = e.target.value.slice(2, 4);
         seconds = e.target.value.slice(4, 6);
@@ -28,11 +30,11 @@
      */
     let realInput;
     let selectPosition = -1;
+    export let id;
 </script>
 
-
 <div class="thing">
-    <input bind:this={realInput} class="realInput" on:keyup={moveSelect} on:input={takeInput}  value="000000" type="text" maxlength="7" />
+    <input bind:this={realInput} class="realInput" on:keyup={moveSelect} on:input={takeInput} on:focusout={()=> selectPosition=-1} value="000000" type="text"  name={id} id={id}  maxlength="7" />
     <!-- svelte-ignore a11y-click-events-have-key-events -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div on:focus={() => realInput.focus()} on:click={() => {realInput.focus(); selectPosition = 0; realInput.selectionEnd = realInput.value.length}}  class="fakeInput">
@@ -41,6 +43,8 @@
         <div><span class="{selectPosition == 1 ? "selected":""}">{seconds[0]}</span><span class="{selectPosition == 0 ? "selected" : ""}">{seconds[1]}</span><span class="smol">s</span></div>
     </div>
 </div>
+
+
 
 <style>
     .selected {
@@ -91,9 +95,10 @@
         font-size: 0.7rem;
     }
     .fakeInput {
+        background-color: rgb(26, 38, 48);
         display: flex;
         gap: 0.3ch;
-        padding: 0.25em;
+        padding: 0.1em 0.25em;
         width: 6.5em;
         justify-content: center;
         border-radius: 0.25em;
@@ -101,6 +106,6 @@
     }
     .thing {
         position: relative;
-        width: fit-content;
+        margin: 0 0.25em;
     }
 </style>
