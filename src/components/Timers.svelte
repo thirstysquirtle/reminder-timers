@@ -189,7 +189,12 @@
         <button class="rounded-sm border-2 px-1 border-slate-300 bg-sky-600" type="submit"> Add ↑ </button>
     </form>
 </div>
-
+{#if notifSound}
+<div class="flex gap-2 mx-5">
+<h3>Volume: </h3>
+<input bind:value={notifSound.volume} type="range" min="0.00" max="1.00" step="0.01" >
+</div>
+{/if}
 {#if !notifPermission}
     <p class="w-full flex justify-center text-2xl">You might want to allow notifications</p>
 {/if}
