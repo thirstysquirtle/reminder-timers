@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { onMount, tick } from "svelte";
     import TimeInput from "./TimeInput.svelte";
 
     function formatTime(timeAmt: number): string {
@@ -44,67 +44,50 @@
         }
     }
     let notifPermission = false;
+    let timersCache;
     onMount(() => {
         setupNotifications();
         currentTime = Date.now();
-<<<<<<< HEAD
-        const timer = setInterval(() => {
-            timers = timers.map((timer) => {
+      
+  
+        const decrementWorker = new Worker("/src/worker.js")
+        timersCache = timers;
+        let notificationQueue = [];
+        decrementWorker.onmessage = (e) => {
+            console.log("test")
+            timers = timersCache;
+            for (const {title, options} of notificationQueue) {
+                new Notification(title, options)
+                notifSound.play()
+            }
+            notificationQueue = []
+            tick()
+            timersCache = timers.map((timer) => {
                 if (timer.active) {
                     timer.timeLeftSeconds -= 1;
                     if (timer.timeLeftSeconds < 0) {
                         timer.timeLeftSeconds = timer.intervalInSeconds;
                         timer.count += 1;
                         if (Notification.permission == "granted") {
-                            new Notification(
+                            notificationQueue.push({ title:
                                 timer.reminder,
-                                {...notificationOptions, body: `${new Date(Date.now()).toLocaleString()}`}
-                            );
-                            // notifSound.pause()
-                            notifSound.currentTime = 0;
-                            notifSound.play();
+                                options:
+                                {...notificationOptions, body: `${new Date(Date.now()).toLocaleString()}`},
+                        })
                         }
                     }
                 }
                 return timer;
             });
-        }, 1000);
-=======
-        // const timer = setInterval(() => {
-        //     timers = timers.map((timer) => {
-        //         if (timer.active) {
-        //             timer.timeLeftSeconds -= 1;
-        //             if (timer.timeLeftSeconds < 0) {
-        //                 timer.timeLeftSeconds = timer.intervalInSeconds;
-        //                 timer.count += 1;
-        //                 if (Notification.permission == "granted") {
-        //                     new Notification(
-        //                         timer.reminder,
-        //                         notificationOptions
-        //                     );
-        //                     // notifSound.pause()
-        //                     notifSound.currentTime = 0;
-        //                     notifSound.play();
-        //                 }
-        //             }
-        //         }
-        //         return timer;
-        //     });
-        // }, 1000);
-        const decrementWorker = new Worker("/src/worker.js")
-        decrementWorker.onmessage = (e) => {
-            timers = e.data
-            decrementWorker.postMessage(timers)
         }
         decrementWorker.postMessage(timers)
->>>>>>> 6521484 (Trying to learn web workers)
 
         return () => {
             // clearInterval(timer);
         };
     });
     function delTimer(id) {
-        timers = timers.filter((timer) => timer.createdAt != id);
+        timers = timersCache = timersCache.filter((timer) => timer.createdAt != id);
     }
 
     type timer = {
@@ -147,8 +130,8 @@
         console.log(formDat.get("time"));
         console.log(formDat.get("reminder"));
         const timeInSecs = unformatTime(formDat.get("time").toString());
-        timers = [
-            ...timers,
+        timers = timersCache = [
+            ...timersCache,
             {
                 reminder: formDat.get("reminder").toString(),
                 createdAt: new Date(Date.now()),
