@@ -47,6 +47,7 @@
     onMount(() => {
         setupNotifications();
         currentTime = Date.now();
+<<<<<<< HEAD
         const timer = setInterval(() => {
             timers = timers.map((timer) => {
                 if (timer.active) {
@@ -68,9 +69,38 @@
                 return timer;
             });
         }, 1000);
+=======
+        // const timer = setInterval(() => {
+        //     timers = timers.map((timer) => {
+        //         if (timer.active) {
+        //             timer.timeLeftSeconds -= 1;
+        //             if (timer.timeLeftSeconds < 0) {
+        //                 timer.timeLeftSeconds = timer.intervalInSeconds;
+        //                 timer.count += 1;
+        //                 if (Notification.permission == "granted") {
+        //                     new Notification(
+        //                         timer.reminder,
+        //                         notificationOptions
+        //                     );
+        //                     // notifSound.pause()
+        //                     notifSound.currentTime = 0;
+        //                     notifSound.play();
+        //                 }
+        //             }
+        //         }
+        //         return timer;
+        //     });
+        // }, 1000);
+        const decrementWorker = new Worker("/src/worker.js")
+        decrementWorker.onmessage = (e) => {
+            timers = e.data
+            decrementWorker.postMessage(timers)
+        }
+        decrementWorker.postMessage(timers)
+>>>>>>> 6521484 (Trying to learn web workers)
 
         return () => {
-            clearInterval(timer);
+            // clearInterval(timer);
         };
     });
     function delTimer(id) {
