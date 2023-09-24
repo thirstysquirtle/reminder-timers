@@ -44,7 +44,7 @@
         setupNotifications();
         currentTime = Date.now();
 
-        const decrementWorker = new Worker("/src/worker.js");
+        const decrementWorker = new Worker("/repeating-timers/worker.js");
         timersCache = timers;
         let notificationQueue = [];
         decrementWorker.onmessage = (e) => {
