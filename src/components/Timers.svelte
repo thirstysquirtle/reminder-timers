@@ -57,7 +57,7 @@
                         if (Notification.permission == "granted") {
                             new Notification(
                                 timer.reminder,
-                                notificationOptions
+                                {...notificationOptions, body: `${new Date(Date.now()).toLocaleString()}`}
                             );
                             // notifSound.pause()
                             notifSound.currentTime = 0;
