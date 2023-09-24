@@ -94,9 +94,9 @@
         {
             reminder: "20-20-20",
             createdAt: new Date(Date.now()),
-            intervalInSeconds: 1200,
+            intervalInSeconds: 1320,
             active: true,
-            timeLeftSeconds: 1200,
+            timeLeftSeconds: 1320,
             count: 0,
         },
         {
