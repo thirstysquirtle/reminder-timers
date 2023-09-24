@@ -192,7 +192,7 @@
 {#if notifSound}
 <div class="flex gap-2 mx-5">
 <h3>Volume: </h3>
-<input bind:value={notifSound.volume} type="range" min="0.00" max="1.00" step="0.01" >
+<input on:mouseup={() => {notifSound.currentTime= 0;notifSound.play()}} bind:value={notifSound.volume} type="range" min="0.00" max="1.00" step="0.01" >
 </div>
 {/if}
 {#if !notifPermission}
