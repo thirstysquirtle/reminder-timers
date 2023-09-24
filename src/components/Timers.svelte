@@ -6,8 +6,7 @@
         let hours: any = Math.floor(timeAmt / 3600);
         const minutes = Math.floor(timeAmt / 60);
         const seconds = timeAmt % 60 == 0 ? "00" : timeAmt % 60;
-        hours =
-            hours == 0 ? "" : `${hours}<span class="text-sm">h</span>&nbsp;`;
+        hours = hours == 0 ? "" : `${hours}<span class="text-sm">h</span>&nbsp;`;
 
         return `${hours}${minutes}<span class="text-sm">m</span>&nbsp;${seconds}<span class="text-sm">s</span>`;
     }
@@ -26,16 +25,12 @@
         if (!("Notification" in window)) {
             alert("This browser does not support desktop notification");
         } else if (Notification.permission == "granted") {
-            notifSound = new Audio(
-                "/repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3"
-            );
+            notifSound = new Audio("/repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3");
             notifPermission = true;
         } else if (Notification.permission !== "denied") {
             Notification.requestPermission().then((permission) => {
                 if (permission == "granted") {
-                    notifSound = new Audio(
-                        "/repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3"
-                    );
+                    notifSound = new Audio("/repeating-timers/short-success-sound-glockenspiel-treasure-video-game-6346.mp3");
                     notifPermission = true;
                 } else {
                     notifPermission = false;
@@ -48,20 +43,22 @@
     onMount(() => {
         setupNotifications();
         currentTime = Date.now();
-      
-  
-        const decrementWorker = new Worker("/src/worker.js")
+
+        const decrementWorker = new Worker("/src/worker.js");
         timersCache = timers;
         let notificationQueue = [];
         decrementWorker.onmessage = (e) => {
-            console.log("test")
             timers = timersCache;
-            for (const {title, options} of notificationQueue) {
-                new Notification(title, options)
-                notifSound.play()
+            for (const { title, options } of notificationQueue) {
+                new Notification(title, options).onclick = function (event) {
+                    event.preventDefault(); // prevent the browser from focusing the Notification's tab
+                    window.focus(); // focus the window or tab that created the notification
+                };
+                notifSound.currentTime = 0;
+                notifSound.play();
             }
-            notificationQueue = []
-            tick()
+            notificationQueue = [];
+            tick();
             timersCache = timers.map((timer) => {
                 if (timer.active) {
                     timer.timeLeftSeconds -= 1;
@@ -69,21 +66,15 @@
                         timer.timeLeftSeconds = timer.intervalInSeconds;
                         timer.count += 1;
                         if (Notification.permission == "granted") {
-                            notificationQueue.push({ title:
-                                timer.reminder,
-                                options:
-                                {...notificationOptions, body: `${new Date(Date.now()).toLocaleString()}`},
-                        })
+                            notificationQueue.push({
+                                title: timer.reminder,
+                                options: { ...notificationOptions, body: `${new Date(Date.now()).toLocaleString()}` },
+                            });
                         }
                     }
                 }
                 return timer;
             });
-        }
-        decrementWorker.postMessage(timers)
-
-        return () => {
-            // clearInterval(timer);
         };
     });
     function delTimer(id) {
@@ -127,8 +118,6 @@
 
     function addTimer(e) {
         const formDat = new FormData(e.target);
-        console.log(formDat.get("time"));
-        console.log(formDat.get("reminder"));
         const timeInSecs = unformatTime(formDat.get("time").toString());
         timers = timersCache = [
             ...timersCache,
@@ -165,15 +154,9 @@
                 <div>
                     <h4 class="mobile-visible">Time Left</h4>
                     <p>
-                        {Math.floor(timer.timeLeftSeconds / 3600)}<span
-                            class="text-sm">h</span
-                        >
-                        {Math.floor(timer.timeLeftSeconds / 60)}<span
-                            class="text-sm">m</span
-                        >
-                        {timer.timeLeftSeconds % 60}<span class="text-sm"
-                            >s</span
-                        >
+                        {Math.floor(timer.timeLeftSeconds / 3600)}<span class="text-sm">h</span>
+                        {Math.floor(timer.timeLeftSeconds / 60)}<span class="text-sm">m</span>
+                        {timer.timeLeftSeconds % 60}<span class="text-sm">s</span>
                     </p>
                 </div>
                 <div>
@@ -183,57 +166,32 @@
                 <div class="flex">
                     <h4 class="mobile-visible">Status</h4>
                     <label class="swap">
-                        <input
-                            type="checkbox"
-                            name="activeTimer"
-                            bind:checked={timer.active}
-                        />
-                        <div
-                            class="rounded border-2 px-1 border-slate-300 bg-green-700 swap-on"
-                        >
-                            Ticking
-                        </div>
-                        <div
-                            class="rounded border-2 px-1 border-slate-300 bg-slate-700 swap-off"
-                        >
-                            Paused
-                        </div>
+                        <input type="checkbox" name="activeTimer" bind:checked={timer.active} />
+                        <div class="rounded border-2 px-1 border-slate-300 bg-green-700 swap-on">Ticking</div>
+                        <div class="rounded border-2 px-1 border-slate-300 bg-slate-700 swap-off">Paused</div>
                     </label>
                 </div>
 
                 <div>
                     <h4 class="mobile-visible">Del</h4>
-                    <button on:click={delTimer(timer.createdAt)} class="del-btn"
-                        >&times;</button
-                    >
+                    <button on:click={delTimer(timer.createdAt)} class="del-btn">&times;</button>
                 </div>
             </div>
         {/each}
     </ul>
 
-    <form
-        id="add-reminder-form"
-        class="gap-2 justify-center m-2"
-        on:submit|preventDefault={addTimer}
-    >
+    <form id="add-reminder-form" class="gap-2 justify-center m-2" on:submit|preventDefault={addTimer}>
         <label for="reminder">Name:</label>
         <input type="text" name="reminder" id="reminder" />
 
         <label for="time">Timer Interval: </label>
         <TimeInput id={"time"} />
-        <button
-            class="rounded-sm border-2 px-1 border-slate-300 bg-sky-600"
-            type="submit"
-        >
-            Add ↑
-        </button>
+        <button class="rounded-sm border-2 px-1 border-slate-300 bg-sky-600" type="submit"> Add ↑ </button>
     </form>
 </div>
 
 {#if !notifPermission}
-    <p class="w-full flex justify-center text-2xl">
-        You might want to allow notifications
-    </p>
+    <p class="w-full flex justify-center text-2xl">You might want to allow notifications</p>
 {/if}
 
 <style>
