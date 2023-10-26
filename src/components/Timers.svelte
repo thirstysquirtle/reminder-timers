@@ -1,10 +1,48 @@
 <script lang="ts">
     import { onMount, tick } from "svelte";
     import TimeInput from "./TimeInput.svelte";
+    import { flip } from "svelte/animate";
+    import { slide } from "svelte/transition";
+
+    type timer = {
+        createdAt: Date;
+        reminder: string;
+        intervalInSeconds: number;
+        timeLeftSeconds: number;
+        active: boolean;
+        count: number;
+    };
+
+    let timers: Array<timer> = [
+        {
+            reminder: "20-20-20",
+            createdAt: new Date(Date.now()),
+            intervalInSeconds: 1320,
+            active: true,
+            timeLeftSeconds: 1320,
+            count: 0,
+        },
+        {
+            reminder: "Blink",
+            createdAt: new Date(Date.now()),
+            intervalInSeconds: 270,
+            active: true,
+            timeLeftSeconds: 270,
+            count: 0,
+        },
+        {
+            reminder: "Ultradian Cycle",
+            createdAt: new Date(Date.now()),
+            intervalInSeconds: 5700,
+            active: true,
+            timeLeftSeconds: 5700,
+            count: 0,
+        },
+    ];
 
     function formatTime(timeAmt: number): string {
         let hours: any = Math.floor(timeAmt / 3600);
-        const minutes = Math.floor((timeAmt / 60)%60);
+        const minutes = Math.floor((timeAmt / 60) % 60);
         const seconds = timeAmt % 60 == 0 ? "00" : timeAmt % 60;
         hours = hours == 0 ? "" : `${hours}<span class="text-sm">h</span>&nbsp;`;
 
@@ -77,45 +115,17 @@
             });
         };
     });
+    function resetTimer(timerId) {
+        const timerToReset = timersCache.find((timer) => timer.createdAt === timerId)
+        timerToReset.timeLeftSeconds = timerToReset.intervalInSeconds
+
+        timers = [...timersCache];
+    }
+
     function delTimer(id) {
         timers = timersCache = timersCache.filter((timer) => timer.createdAt != id);
     }
 
-    type timer = {
-        createdAt: Date;
-        reminder: string;
-        intervalInSeconds: number;
-        timeLeftSeconds: number;
-        active: boolean;
-        count: number;
-    };
-
-    let timers: Array<timer> = [
-        {
-            reminder: "20-20-20",
-            createdAt: new Date(Date.now()),
-            intervalInSeconds: 1320,
-            active: true,
-            timeLeftSeconds: 1320,
-            count: 0,
-        },
-        {
-            reminder: "Blink",
-            createdAt: new Date(Date.now()),
-            intervalInSeconds: 270,
-            active: true,
-            timeLeftSeconds: 270,
-            count: 0,
-        },
-        {
-            reminder: "Ultradian Cycle",
-            createdAt: new Date(Date.now()),
-            intervalInSeconds: 5700,
-            active: true,
-            timeLeftSeconds: 5700,
-            count: 0,
-        },
-    ];
     function unformatTime(hhmmss: string): number {
         const hours: number = Number(hhmmss.slice(0, 2)) * 3600;
         const minutes: number = Number(hhmmss.slice(2, 4)) * 60;
@@ -124,9 +134,11 @@
         return hours + minutes + seconds;
     }
 
-    function addTimer(e) {
+    async function addTimer(e) {
+        const wait1ms = wait(1);
         const formDat = new FormData(e.target);
         const timeInSecs = unformatTime(formDat.get("time").toString());
+        await wait1ms;
         timers = timersCache = [
             ...timersCache,
             {
@@ -139,6 +151,15 @@
             },
         ];
     }
+
+    async function wait(miliseconds: number) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve("ok");
+            }, miliseconds);
+        });
+        return;
+    }
 </script>
 
 <h2 class="flex justify-center m-2 font-bold">Repeating Timers</h2>
@@ -149,11 +170,11 @@
         <h3>Time Left</h3>
         <h3 class="text-sm">Count</h3>
         <h3>Status</h3>
-        <h3 class="text-sm">Del</h3>
+        <h3 class="text-sm">Ctl</h3>
     </div>
     <ul>
         {#each timers as timer (timer.createdAt)}
-            <div class="row grid items-center">
+            <li in:slide={{ axis: "y", duration: 150 }} animate:flip={{ duration: 150 }} class="row grid items-center">
                 <h4>{timer.reminder}</h4>
                 <div>
                     <h4 class="mobile-visible">Interval</h4>
@@ -181,11 +202,17 @@
                     </label>
                 </div>
 
-                <div>
-                    <h4 class="mobile-visible">Del</h4>
-                    <button on:click={delTimer(timer.createdAt)} class="del-btn">&times;</button>
+                <div class="flex justify-evenly gap-1">
+                    <h4 class="mobile-visible">Ctl</h4>
+                    <button on:click={() => {resetTimer(timer.createdAt)}} class="rounded-md bg-slate-600 h-[2rem] aspect-square grid place-items-center">⏪</button>
+                    <button
+                        on:click={() => {
+                            delTimer(timer.createdAt);
+                        }}
+                        class="rounded-md text-[0.9rem] bg-red-400 h-[2rem] aspect-square grid place-items-center">X</button
+                    >
                 </div>
-            </div>
+            </li>
         {/each}
     </ul>
 
@@ -195,13 +222,16 @@
 
         <label for="time">Timer Interval: </label>
         <TimeInput id={"time"} />
-        <button class="rounded-sm border-2 px-1 border-slate-300 bg-sky-600" type="submit"> Add ↑ </button>
+        <button class="rounded-sm border-2 px-1 border-slate-300 text-white bg-sky-700" type="submit"> Add ↑ </button>
     </form>
 </div>
 {#if notifSound}
     <div class="flex gap-2 mx-5">
-        <h3>Volume:</h3>
+        <label for="volume">
+            <h3>Volume:</h3>
+        </label>
         <input
+            id="volume"
             on:mouseup={() => {
                 notifSound.currentTime = 0;
                 notifSound.play();
@@ -272,7 +302,7 @@
     }
     .row {
         width: 100%;
-        grid-template-columns: minmax(14em, 1.25fr) 1fr 1fr 3em 5em 3em;
+        grid-template-columns: minmax(14em, 1.25fr) 1fr 1fr 3em 5em 4em;
         word-break: break-all;
     }
 
