@@ -2,7 +2,7 @@
     import { onMount, tick } from "svelte";
     import TimeInput from "./TimeInput.svelte";
     import { flip } from "svelte/animate";
-    import { slide } from "svelte/transition";
+    import { fade, slide } from "svelte/transition";
 
     type timer = {
         createdAt: Date;
@@ -116,8 +116,8 @@
         };
     });
     function resetTimer(timerId) {
-        const timerToReset = timersCache.find((timer) => timer.createdAt === timerId)
-        timerToReset.timeLeftSeconds = timerToReset.intervalInSeconds
+        const timerToReset = timersCache.find((timer) => timer.createdAt === timerId);
+        timerToReset.timeLeftSeconds = timerToReset.intervalInSeconds;
 
         timers = [...timersCache];
     }
@@ -195,16 +195,33 @@
                 </div>
                 <div class="flex">
                     <h4 class="mobile-visible">Status</h4>
-                    <label class="swap">
-                        <input type="checkbox" name="activeTimer" bind:checked={timer.active} />
-                        <div class="rounded border-2 px-1 border-slate-300 bg-green-700 swap-on">Ticking</div>
-                        <div class="rounded border-2 px-1 border-slate-300 bg-slate-700 swap-off">Paused</div>
+                    <label class="cursor-pointer relative w-full h-full mx-1">
+                        <input type="checkbox" class="peer hidden" name="activeTimer" bind:checked={timer.active} />
+                        <div class="transition-all duration-300 absolute inset-0 opacity-0 peer-checked:opacity-100 h-full">
+                            <div
+                                class="transition-all duration-300 rounded border-2 px-1 border-slate-300 bg-green-700 h-full flex items-center"
+                            >
+                                Ticking
+                            </div>
+                        </div>
+                        <div class="transition-all duration-300 absolute inset-0 opacity-100 peer-checked:opacity-0 h-full">
+                            <div
+                                class="rounded border-2 px-1 border-slate-300 bg-slate-700 h-full flex items-center "
+                            >
+                                Paused
+                            </div>
+                        </div>
                     </label>
                 </div>
 
                 <div class="flex justify-evenly gap-1">
                     <h4 class="mobile-visible">Ctl</h4>
-                    <button on:click={() => {resetTimer(timer.createdAt)}} class="rounded-md bg-slate-600 h-[2rem] aspect-square grid place-items-center">⏪</button>
+                    <button
+                        on:click={() => {
+                            resetTimer(timer.createdAt);
+                        }}
+                        class="rounded-md bg-slate-600 h-[2rem] aspect-square grid place-items-center">⏪</button
+                    >
                     <button
                         on:click={() => {
                             delTimer(timer.createdAt);
