@@ -4,7 +4,7 @@
 
     function formatTime(timeAmt: number): string {
         let hours: any = Math.floor(timeAmt / 3600);
-        const minutes = Math.floor(timeAmt / 60);
+        const minutes = Math.floor((timeAmt / 60)%60);
         const seconds = timeAmt % 60 == 0 ? "00" : timeAmt % 60;
         hours = hours == 0 ? "" : `${hours}<span class="text-sm">h</span>&nbsp;`;
 
@@ -47,15 +47,19 @@
         const decrementWorker = new Worker("/repeating-timers/worker.js");
         timersCache = timers;
         let notificationQueue = [];
-        decrementWorker.onmessage = (e) => {
+        decrementWorker.onmessage = async (e) => {
             timers = timersCache;
             for (const { title, options } of notificationQueue) {
-                new Notification(title, options).onclick = function (event) {
-                    event.preventDefault(); // prevent the browser from focusing the Notification's tab
-                    window.focus(); // focus the window or tab that created the notification
-                };
-                notifSound.currentTime = 0;
-                notifSound.play();
+                // new Notification(title, options).onclick = function (event) {
+                //     event.preventDefault(); // prevent the browser from focusing the Notification's tab
+                //     window.focus(); // focus the window or tab that created the notification
+                // };
+                // notifSound.currentTime = 0;
+                // notifSound.play();
+                const registration = await navigator.serviceWorker.ready;
+                console.log("wat");
+                registration.active.postMessage("Testsetste");
+                registration.showNotification("aospdkaposdk");
             }
             notificationQueue = [];
             tick();
@@ -102,9 +106,17 @@
         {
             reminder: "Blink",
             createdAt: new Date(Date.now()),
-            intervalInSeconds: 180,
+            intervalInSeconds: 270,
             active: true,
-            timeLeftSeconds: 180,
+            timeLeftSeconds: 270,
+            count: 0,
+        },
+        {
+            reminder: "Ultradian Cycle",
+            createdAt: new Date(Date.now()),
+            intervalInSeconds: 5700,
+            active: true,
+            timeLeftSeconds: 5700,
             count: 0,
         },
     ];
@@ -153,11 +165,12 @@
                 </div>
                 <div>
                     <h4 class="mobile-visible">Time Left</h4>
-                    <p>
+                    <span>{@html formatTime(timer.timeLeftSeconds)}</span>
+                    <!-- <p>
                         {Math.floor(timer.timeLeftSeconds / 3600)}<span class="text-sm">h</span>
                         {Math.floor(timer.timeLeftSeconds / 60)}<span class="text-sm">m</span>
                         {timer.timeLeftSeconds % 60}<span class="text-sm">s</span>
-                    </p>
+                    </p> -->
                 </div>
                 <div>
                     <h4 class="mobile-visible">Count</h4>
@@ -190,10 +203,20 @@
     </form>
 </div>
 {#if notifSound}
-<div class="flex gap-2 mx-5">
-<h3>Volume: </h3>
-<input on:mouseup={() => {notifSound.currentTime= 0;notifSound.play()}} bind:value={notifSound.volume} type="range" min="0.00" max="1.00" step="0.01" >
-</div>
+    <div class="flex gap-2 mx-5">
+        <h3>Volume:</h3>
+        <input
+            on:mouseup={() => {
+                notifSound.currentTime = 0;
+                notifSound.play();
+            }}
+            bind:value={notifSound.volume}
+            type="range"
+            min="0.00"
+            max="1.00"
+            step="0.01"
+        />
+    </div>
 {/if}
 {#if !notifPermission}
     <p class="w-full flex justify-center text-2xl">You might want to allow notifications</p>
