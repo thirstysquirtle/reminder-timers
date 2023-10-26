@@ -50,16 +50,12 @@
         decrementWorker.onmessage = async (e) => {
             timers = timersCache;
             for (const { title, options } of notificationQueue) {
-                // new Notification(title, options).onclick = function (event) {
-                //     event.preventDefault(); // prevent the browser from focusing the Notification's tab
-                //     window.focus(); // focus the window or tab that created the notification
-                // };
-                // notifSound.currentTime = 0;
-                // notifSound.play();
-                const registration = await navigator.serviceWorker.ready;
-                console.log("wat");
-                registration.active.postMessage("Testsetste");
-                registration.showNotification("aospdkaposdk");
+                new Notification(title, options).onclick = function (event) {
+                    event.preventDefault(); // prevent the browser from focusing the Notification's tab
+                    window.focus(); // focus the window or tab that created the notification
+                };
+                notifSound.currentTime = 0;
+                notifSound.play();
             }
             notificationQueue = [];
             tick();
